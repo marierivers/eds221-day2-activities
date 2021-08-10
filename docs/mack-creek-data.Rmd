@@ -1,0 +1,76 @@
+---
+title: "mack_creek_data"
+author: "Marie Rivers"
+date: "8/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+## Read in the .csv file
+```{r}
+mack_verts <- read_csv(here("data", "AS00601.csv"))
+View(mack_verts)
+```
+
+## update names to lower_snake_case
+```{r}
+mack_verts <- clean_names(mack_verts)
+View(mack_verts)
+```
+
+```{r}
+### store the 5th value in column "weight" as `mc_wt_5`
+mc_wt_5 <- mack_verts$weight[5]
+mc_wt_5
+
+mc_length_8_20 <- mack_verts$length1[8:20]
+mc_length_8_20
+
+### store everything in column `sampledate` as a vector called mc_dates
+
+mc_dates <- mack_verts$sampledate
+mc_dates
+```
+## Make a salamander subset
+```{r}
+mc_salamanders <- mack_verts %>% 
+  filter(species == "DITE")
+
+mc_all_salamanders <- mack_verts %>% 
+  filter(species != "ONCL")
+
+mc_rhol <- mack_verts %>% 
+  filter(species == "RHOL")
+```
+## Make a scatterplot
+```{r}
+ggplot(data = mc_all_salamanders, aes(x = length1, y = weight)) +
+  geom_point(aes(color = species)) +
+  labs(title = "Salamander Size",
+       subtitle = "from Mack Creek data",
+       x = "snout-vent length (mm)",
+       y = "weight (grams)")
+
+ggsave(here("figs", "salamander_size.png"))
+```
+## Make a cutthroat plot
+```{r}
+mc_trout <- mack_verts %>% 
+  filter(species == "ONCL")
+
+ggplot(data = mc_trout, aes(x = length1, y = weight)) +
+  geom_point(aes(color = reach)) +
+  scale_color_manual(values = c("blue", "red", "orange")) +
+  facet_wrap((~reach)) +
+  labs(title = "Cutthroat trout size",
+       subtitle = "from Mack Creek",
+       x = "length (mm)",
+       y = "weight (g)")
+
+```
